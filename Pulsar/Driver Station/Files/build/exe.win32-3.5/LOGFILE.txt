@@ -1,0 +1,7 @@
+MiniFRC Driver Station 2017 V3.6
+Booting...
+[INFO] found config.txt, reading...
+[INFO] Added "axis" keyboard-controlled axis to package list
+[INFO] Joysticks not enabled in config file, not loading joystick control
+[WARNING] Couldn't connect to robot with specified COM port in config file
+[WARNING] Normal operation has ended, expect an error message
