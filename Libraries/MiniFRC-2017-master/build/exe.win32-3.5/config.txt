@@ -1,0 +1,7 @@
+COM4
+axis,LeftRight,a,d
+axis,ForwardBack,w,s
+button,Intake,u
+button,Arm,o
+axis,Climber1,i,k
+axis,Climber2,j,l

@@ -1,0 +1,10 @@
+MiniFRC Driver Station 2017 V3.6
+Booting...
+[INFO] found config.txt, reading...
+[INFO] Added "keykey" keyboard-controlled axis to package list
+[INFO] Added "HELP" keyboard-controlled button to package list
+[NOTICE] Changed default Baudrate from 9600 to 115200
+[INFO] Joysticks not enabled in config file, not loading joystick control
+[NOTICE] Config has set Driver station to test mode, things might act weird
+[NOTICE] Test mode active, not connecting to robot
+[INFO] Driver station is now ACTIVE
