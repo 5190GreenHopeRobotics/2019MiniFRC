@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MiniFRCDriver"
         mc:Ignorable="d"
-        Title="MiniFRC Driver Station" Height="350" Width="525" Background="#FF383838">
-    <Grid>
+        Title="MiniFRC Driver Station" Height="139.565" Width="607.866" Background="#FF383838">
+    <Grid Height="107" VerticalAlignment="Top">
         <Border BorderBrush="#FF707070" BorderThickness="1" HorizontalAlignment="Left" Height="90" Margin="10,10,0,0" VerticalAlignment="Top" Width="155">
             <Grid Margin="-1">
                 <Button x:Name="teleopButton" Content="Tele-Operated" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="135" Background="#FF646464" RenderTransformOrigin="3.12,-0.139" Foreground="#FFB9B9B9"/>
@@ -17,8 +17,21 @@
         <Border BorderBrush="#FF707070" BorderThickness="1" HorizontalAlignment="Left" Height="90" Margin="170,10,0,0" VerticalAlignment="Top" Width="146">
             <Grid Margin="-1">
                 <ListBox x:Name="portList" HorizontalAlignment="Left" Height="45" VerticalAlignment="Top" Width="126" Margin="10,35,0,0" BorderBrush="#FF5B5B5B" Background="#FF646464" Foreground="#FFB9B9B9"/>
-                <Button x:Name="portLabel" Content="Port" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="61" Background="#FF646464" BorderBrush="#FF707070" Foreground="#FFB9B9B9"/>
                 <Button x:Name="portRefreshButton" Content="Refresh" HorizontalAlignment="Left" Margin="76,10,0,0" VerticalAlignment="Top" Width="60" Foreground="#FFB9B9B9" Background="#FF646464" BorderBrush="#FF707070" Click="portRefreshButton_Click"/>
+                <Border BorderBrush="#FF5B5B5B" BorderThickness="1" HorizontalAlignment="Left" Height="20" Margin="10,10,0,0" VerticalAlignment="Top" Width="61" Background="#FF646464">
+                    <Label Content="Port" Margin="14,-4,5,-4" Foreground="#FFB9B9B9"/>
+                </Border>
+            </Grid>
+        </Border>
+        <Border BorderBrush="DimGray" BorderThickness="1" HorizontalAlignment="Left" Margin="321,10,0,7" Width="269" Background="#FF383838">
+            <Grid>
+                <Border BorderBrush="#FF5B5B5B" BorderThickness="1" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="182" Background="#FF646464" Margin="75,10,0,0">
+                    <Label x:Name="portNameLabel" Content="" Margin="10,-4,9,-4" Foreground="#FFB9B9B9"/>
+                </Border>
+                <Button x:Name="loadButton" Content="Load" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="60" Background="#FF646464" BorderBrush="#FF5B5B5B" Foreground="#FFB9B9B9" Click="loadButton_Click"/>
+                <TextBox HorizontalAlignment="Left" Height="45" Margin="75,35,0,0" TextWrapping="Wrap" Text="TextBox&#x0a;Textbox" VerticalAlignment="Top" Width="182" Background="#FF646464" BorderBrush="#FF5B5B5B" Foreground="#FFB9B9B9"/>
+                <Button x:Name="consoleButton" Content="Console" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top" Width="60" Background="#FF646464" BorderBrush="#FF5B5B5B" Foreground="#FFB9B9B9" Click="consoleButton_Click"/>
+                <Button x:Name="settingsButton" Content="Settings" HorizontalAlignment="Left" Height="20" Margin="10,60,0,0" VerticalAlignment="Top" Width="60" Foreground="#FFB9B9B9" Background="#FF646464" BorderBrush="#FF5B5B5B" Click="settingsButton_Click"/>
             </Grid>
         </Border>
 

@@ -21,6 +21,8 @@ namespace MiniFRCDriver
     /// </summary>
     public partial class MainWindow : Window
     {
+        public string currentPort = "";
+
         public MainWindow()
         {
             InitializeComponent();
@@ -29,6 +31,10 @@ namespace MiniFRCDriver
         private void portRefreshButton_Click(object sender, RoutedEventArgs e)
         {
             Console.WriteLine("Refresh Clicked");
+
+            portList.Items.Clear();
+
+            Console.WriteLine(SerialPort.GetPortNames());
             string[] ports = SerialPort.GetPortNames();
 
             foreach(string port in ports)
@@ -36,6 +42,36 @@ namespace MiniFRCDriver
                 portList.Items.Add(port);
                 Console.WriteLine(port);
             }
+
+            if (ports.Length == 0)
+            {
+                portList.Items.Add("No Devices");
+            }
+        }
+
+        private void loadButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (portList.SelectedItem != null)
+            {
+                currentPort = portList.SelectedItem.ToString();
+                portNameLabel.Content = portList.SelectedItem.ToString();
+            }
+            else
+            {
+                MessageBox.Show("Please select a port first.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void settingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsWindow settings = new SettingsWindow();
+            settings.Show();
+        }
+
+        private void consoleButton_Click(object sender, RoutedEventArgs e)
+        {
+            ConsoleWindow console = new ConsoleWindow();
+            console.Show();
         }
     }
 }
