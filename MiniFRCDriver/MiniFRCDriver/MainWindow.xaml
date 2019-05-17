@@ -5,13 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MiniFRCDriver"
         mc:Ignorable="d"
-        Title="MiniFRC Driver Station" Height="139.565" Width="801.206" Background="#FF383838" ResizeMode="CanMinimize" Loaded="mainWindow_Loaded">
+        Title="MiniFRC Driver Station" Height="139.565" Width="801.206" Background="#FF383838" ResizeMode="CanMinimize" Loaded="mainWindow_Loaded" KeyDown="mainWindow_KeyDown" KeyUp="mainWindow_KeyUp">
     <Grid Height="107" VerticalAlignment="Top">
         <Border BorderBrush="#FF707070" BorderThickness="1" HorizontalAlignment="Left" Height="90" Margin="10,10,0,0" VerticalAlignment="Top" Width="155">
             <Grid Margin="-1">
-                <Button x:Name="teleopButton" Content="Tele-Operated" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="135" Background="#FF646464" RenderTransformOrigin="3.12,-0.139" Foreground="#FFB9B9B9"/>
+                <Button x:Name="teleopButton" Content="Tele-Operated" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="135" Background="#FF646464" RenderTransformOrigin="3.12,-0.139" Foreground="#FFB9B9B9" Click="teleopButton_Click"/>
                 <Button x:Name="autoButton" Content="Autonomous" HorizontalAlignment="Left" VerticalAlignment="Top" Width="135" Background="#FF646464" Margin="10,35,0,0" Foreground="#FFB9B9B9" Click="autoButton_Click"/>
-                <Button x:Name="stopButton" Content="Off" HorizontalAlignment="Left" Margin="10,60,0,0" VerticalAlignment="Top" Width="135" Background="#FF646464" Foreground="#FFB9B9B9"/>
+                <Button x:Name="stopButton" Content="Off" HorizontalAlignment="Left" Margin="10,60,0,0" VerticalAlignment="Top" Width="135" Background="#FF646464" Foreground="#FFB9B9B9" Click="stopButton_Click"/>
             </Grid>
         </Border>
         <Border BorderBrush="#FF707070" BorderThickness="1" HorizontalAlignment="Left" Height="90" Margin="170,10,0,0" VerticalAlignment="Top" Width="146">

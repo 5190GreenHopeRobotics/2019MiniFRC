@@ -34,6 +34,11 @@ void loop() {
         xAxis = Serial.parseFloat() * -100;
         yAxis = Serial.parseFloat() * -100;
 
+        if(botMode = 1){
+          drive(xAxis, yAxis);
+          off();
+        }
+        
         if(botMode = 2){
           drive(xAxis, yAxis);
           delay(Serial.parseInt());
