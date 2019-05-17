@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MiniFRCDriver"
         mc:Ignorable="d"
-        Title="MiniFRC Driver Station" Height="139.565" Width="607.866" Background="#FF383838" ResizeMode="CanMinimize" Loaded="mainWindow_Loaded">
+        Title="MiniFRC Driver Station" Height="139.565" Width="801.206" Background="#FF383838" ResizeMode="CanMinimize" Loaded="mainWindow_Loaded">
     <Grid Height="107" VerticalAlignment="Top">
         <Border BorderBrush="#FF707070" BorderThickness="1" HorizontalAlignment="Left" Height="90" Margin="10,10,0,0" VerticalAlignment="Top" Width="155">
             <Grid Margin="-1">
@@ -23,13 +23,13 @@
                 </Border>
             </Grid>
         </Border>
-        <Border BorderBrush="DimGray" BorderThickness="1" HorizontalAlignment="Left" Margin="321,10,0,7" Width="269" Background="#FF383838">
+        <Border BorderBrush="DimGray" BorderThickness="1" HorizontalAlignment="Left" Margin="321,10,0,7" Width="464" Background="#FF383838">
             <Grid>
-                <Border BorderBrush="#FF5B5B5B" BorderThickness="1" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="182" Background="#FF646464" Margin="75,10,0,0">
+                <Border BorderBrush="#FF5B5B5B" BorderThickness="1" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="377" Background="#FF646464" Margin="75,10,0,0">
                     <Label x:Name="portNameLabel" Content="" Margin="10,-4,9,-4" Foreground="#FFB9B9B9"/>
                 </Border>
                 <Button x:Name="loadButton" Content="Load" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="60" Background="#FF646464" BorderBrush="#FF5B5B5B" Foreground="#FFB9B9B9" Click="loadButton_Click"/>
-                <TextBox x:Name="consoleBox" HorizontalAlignment="Left" Height="45" Margin="75,35,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="182" Background="#FF646464" BorderBrush="#FF5B5B5B" Foreground="#FFB9B9B9" IsVisibleChanged="consoleBox_IsVisibleChanged"/>
+                <TextBox x:Name="consoleBox" HorizontalAlignment="Left" Height="45" Margin="75,35,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="377" Background="#FF646464" BorderBrush="#FF5B5B5B" Foreground="#FFB9B9B9" IsVisibleChanged="consoleBox_IsVisibleChanged"/>
                 <Button x:Name="consoleButton" Content="Console" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top" Width="60" Background="#FF646464" BorderBrush="#FF5B5B5B" Foreground="#FFB9B9B9" Click="consoleButton_Click"/>
                 <Button x:Name="settingsButton" Content="Settings" HorizontalAlignment="Left" Height="20" Margin="10,60,0,0" VerticalAlignment="Top" Width="60" Foreground="#FFB9B9B9" Background="#FF646464" BorderBrush="#FF5B5B5B" Click="settingsButton_Click"/>
             </Grid>
