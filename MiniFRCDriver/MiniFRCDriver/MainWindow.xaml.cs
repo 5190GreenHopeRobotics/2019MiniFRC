@@ -23,23 +23,25 @@ namespace MiniFRCDriver
     /// </summary>
     public partial class MainWindow : Window
     {
-        SerialPort serialPort = new SerialPort();
+        public SerialPort serialPort = new SerialPort();
 
         SettingsWindow settings = new SettingsWindow();
         ConsoleWindow console = new ConsoleWindow();
         InputIdentifier inId = new InputIdentifier();
+        Autonomous Auto = new Autonomous();
+        Teleop teleop = new Teleop();
 
-        Boolean teleopLoop = false;
+        public Boolean teleopLoop = false;
+        public Boolean debugMode = false;
 
         public MainWindow()
         {
             InitializeComponent();
         }
 
+        //refreshes the list of ports
         private void portRefreshButton_Click(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("Refresh Clicked");
-
             portList.Items.Clear();
 
             Console.WriteLine(SerialPort.GetPortNames());
@@ -48,7 +50,6 @@ namespace MiniFRCDriver
             foreach(string port in ports)
             {
                 portList.Items.Add(port);
-                Console.WriteLine(port);
             }
 
             if (ports.Length == 0)
@@ -57,231 +58,88 @@ namespace MiniFRCDriver
             }
         }
 
+        //loads selected port into memory
         private void loadButton_Click(object sender, RoutedEventArgs e)
         {
             if (portList.SelectedItem != null)
             {
                 try
-                {
-                    serialPort.PortName = portList.SelectedItem.ToString();
+                {   serialPort.PortName = portList.SelectedItem.ToString();
                     serialPort.BaudRate = 9600;
                     portNameLabel.Content = portList.SelectedItem.ToString();
-                }
-                catch
-                {
-                    MessageBox.Show("You cannot change the port while it is in use.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                }catch{ errorMsg("You cannot change the port while it is in use."); }
             }
-            else
-            {
-                MessageBox.Show("Please select a port.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            else{ errorMsg("Please select a port."); }
         }
 
+        //opens settings window
         private void settingsButton_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                settings.Show();
-            }
-            catch
-            {
-                settings.Visibility = Visibility.Visible;
-            }
-        }
+        { try{ settings.Show(); }catch{ settings.Visibility = Visibility.Visible; } }
 
+        //opens console window
         private void consoleButton_Click(object sender, RoutedEventArgs e)
-        {
-            ConsoleWindow console = new ConsoleWindow();
-            console.Show();
-        }
+        { try{ console.Show(); }catch{ console.Visibility = Visibility.Visible; } }
 
+        //starts auto
         private void autoButton_Click(object sender, RoutedEventArgs e)
-        {
-            var taskAuto = Task.Run( () => { autonomous(); });
-        }
+        { var taskAuto = Task.Run( () => { Auto.Start(); }); autoButton.Background = Brushes.Green; }
 
+        //code to make consolebox scroll to bottom
         private void consoleBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if (consoleBox.IsVisible)
-            {
-                consoleBox.ScrollToEnd();
-            }
-        }
+        { if (consoleBox.IsVisible){ consoleBox.ScrollToLine(consoleBox.LineCount); } }
 
+        //Code to run on window load
         private void mainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            settings.settingLines = Regex.Split(System.IO.File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "settings.txt"), "\r\n|\r|\n");
-            consoleBox.Text = consoleBox.Text + "Loaded Settings\n";
-            settings.autoLines = Regex.Split(System.IO.File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "autonomous.txt"), "\r\n|\r|\n");
-            consoleBox.Text = consoleBox.Text + "Loaded Autonomous\n";
+            try
+            {
+                settings.settingLines = Regex.Split(System.IO.File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "settings.txt"), "\r\n|\r|\n");
+                consoleBox.Text = consoleBox.Text + "Loaded Settings\n";
+                settings.autoLines = Regex.Split(System.IO.File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "autonomous.txt"), "\r\n|\r|\n");
+                consoleBox.Text = consoleBox.Text + "Loaded Autonomous\n";
+            }
+            catch
+            {
+                MessageBox.Show("Settings and Autonomous was not automatically loaded", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
+        //starts teleop
         private void teleopButton_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                teleopLoop = true;
-                serialPort.Open();
-            }
-            catch
-            {
-                MessageBox.Show("Please select a port.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
+        {   try{ teleopLoop = true; serialPort.Open(); teleopButton.Background = Brushes.Green; }
+            catch{ errorMsg("Please select a port."); }
+        }    
 
-        public void autonomous()
-        {
-            try
-            {
-                serialPort.Open();
-                string[] autoLines = settings.autoLines;
-                if (autoLines != null)
-                {
-                    try
-                    {
-                        foreach (string instruction in autoLines)
-                        {
-                            string[] instParts = Regex.Split(instruction, " ");
-                            string message = "z2 " + instruction;
-                            serialPort.WriteLine(message);
-                            Dispatcher.Invoke(() => { consoleBox.Text = consoleBox.Text + message + "\n"; });
-
-                            Thread.Sleep(Convert.ToInt32(instParts[instParts.Length - 1]) + 2);
-
-                            Dispatcher.Invoke(() => { consoleBox.Text = consoleBox.Text + serialPort.ReadExisting() + "\n"; });
-                        }
-                    }
-                    catch
-                    {
-                        MessageBox.Show("Formatting was incorrect!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                        serialPort.Close();
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("Please load auto in the settings menu first.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-                serialPort.Close();
-            }
-            catch
-            {
-                MessageBox.Show("Please select a port.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                serialPort.Close();
-            }
-        }
-
-        public void teleop()
-        {
-            try
-            {
-                serialPort.Open();
-                string[] settingLines = settings.settingLines;
-                if (settingLines != null)
-                {
-                    while (teleopLoop)
-                    {
-                        try
-                        {
-                            string message = "z1";
-
-                            foreach (string instruction in settingLines)
-                            {
-                                string[] instParts = Regex.Split(instruction, " ");
-                                Key specifiedKey = (Key)Convert.ToChar(instParts[0]);
-                                Dispatcher.Invoke(() =>
-                                {
-                                    if (Keyboard.IsKeyDown(specifiedKey))
-                                    {
-                                        message = message + " 1";
-                                    }
-                                    else
-                                    {
-                                        message = message + " 0";
-                                    }
-                                });
-                            }
-                            serialPort.WriteLine(message);
-                            Dispatcher.Invoke(() => { consoleBox.Text = consoleBox.Text + message + "\n"; });
-                        }
-                        catch
-                        {
-                            MessageBox.Show("Formatting was incorrect!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-                    }
-                }
-                serialPort.Close();
-            }
-            catch
-            {
-                MessageBox.Show("Please select a port.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                serialPort.Close();
-            }
-        }
-
+        //stops teleop
         private void stopButton_Click(object sender, RoutedEventArgs e)
-        {
-            teleopLoop = false;
+        {   teleopLoop = false;
             serialPort.Close();
+            teleopButton.Background = new SolidColorBrush(Color.FromRgb(100, 100, 100));
+            autoButton.Background = new SolidColorBrush(Color.FromRgb(100, 100, 100));
         }
 
+        //Updates the Keys pressed and sends data
         private void mainWindow_KeyDown(object sender, KeyEventArgs e)
-        {
-            Console.WriteLine("Keypress");
-            if (teleopLoop)
-            {
-                string[] settingLines = settings.settingLines;
-                if (settingLines != null)
-                {
-                    try
-                    {
-                        string message = "z1";
+        { teleop.Update(); }
 
-                        foreach (string instruction in settingLines)
-                        {
-                            Key specifiedKey = new Key();
-                            string[] instParts = Regex.Split(instruction, " ");
-                            if (instParts[0] == "axis")
-                            {
-                                string text = "0";
-                                specifiedKey = inId.identifier(instParts[1]);
-                                Key specifiedKey2 = inId.identifier(instParts[2]);
-                                if (Keyboard.IsKeyDown(specifiedKey) && Keyboard.IsKeyDown(specifiedKey2)) { text = "0"; }
-                                if (Keyboard.IsKeyDown(specifiedKey) && !Keyboard.IsKeyDown(specifiedKey2)) { text = "1"; }
-                                if (Keyboard.IsKeyDown(specifiedKey2) && !Keyboard.IsKeyDown(specifiedKey)) { text = "-1"; }
-                                message = message + " " + text;
-                            }
-                            if (instParts[0] == "button")
-                            {
-                                specifiedKey = inId.identifier(instParts[1]);
-                                Console.WriteLine(specifiedKey);
-                                if (Keyboard.IsKeyDown(specifiedKey))
-                                {
-                                    message = message + " 1";
-                                }
-                                else
-                                {
-                                    message = message + " 0";
-                                }
-                            }
-                        }
-                        serialPort.WriteLine(message);
-                        consoleBox.Text = consoleBox.Text + message + "\n";
-                    }
-                    catch
-                    {
-                        MessageBox.Show("Formatting was incorrect!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }
-            }
+        //Updates the Keys pressed and sends data
+        private void mainWindow_KeyUp(object sender, KeyEventArgs e)
+        { teleop.Update(); }
+
+        //Error Message Function
+        public void errorMsg(string message)
+        { MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
+
+        private void debugButton_Click(object sender, RoutedEventArgs e)
+        {
+            debugMode = !debugMode;
+            if (debugMode) { debugButton.Background = Brushes.Green; }
+            if (!debugMode) { debugButton.Background = new SolidColorBrush(Color.FromRgb(100, 100, 100)); }
         }
 
-        private void mainWindow_KeyUp(object sender, KeyEventArgs e)
+        public void debugConsole(string message)
         {
-            if (teleopLoop)
-            {
-                serialPort.WriteLine("z1 0 0");
-            }
+
         }
     }
 }
