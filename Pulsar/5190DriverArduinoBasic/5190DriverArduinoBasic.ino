@@ -10,7 +10,7 @@ AF_DCMotor mRight(4);
 float xAxis, yAxis;
 int velocityL, velocityR, velocityClimb;
 
-int botMode = 0;
+int readMode = 0;
 
 void setup() {
   velocityClimb = 100;
@@ -25,33 +25,28 @@ void setup() {
 void loop() {
   while (Serial.available() > 0) {
     if ((Serial.read()) == 'z') {
-      botMode = Serial.parseInt();
-      if(botMode == 0){
-        off();
-      }
-      else
-      {
-        xAxis = Serial.parseFloat() * -100;
-        yAxis = Serial.parseFloat() * -100;
+      readMode = Serial.parseInt();
 
-        if(botMode = 1){
-          drive(xAxis, yAxis);
-          off();
-        }
-        
-        if(botMode = 2){
-          drive(xAxis, yAxis);
-          delay(Serial.parseInt());
-          Serial.write("done");
-          off();
-        } 
+      //parse data in the order of the data in the drive station
+      xAxis = Serial.parseFloat() * -100;
+      yAxis = Serial.parseFloat() * -100;
+      
+      switch(readMode){
+        case 0: teleop(); break;      // 0 means read it in teleop mode
+        case 1: autonomous(); break;  // 1 means read it in autonomous mode
       }
     }
   }
 }
 
-void off() {
-  drive(0, 0);
+void teleop(){
+  drive(xAxis, yAxis);
+}
+
+void autonomous(){
+  drive(xAxis, yAxis);
+  delay(Serial.parseInt());
+  Serial.write("done");
 }
 
 void drive(int xAxis, int yAxis) {

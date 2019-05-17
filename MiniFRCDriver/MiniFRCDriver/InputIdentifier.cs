@@ -9,7 +9,7 @@ namespace MiniFRCDriver
 {
     class InputIdentifier
     {
-        public Key identifier(string input)
+        static public Key identifier(string input)
         {
             switch (input)
             {

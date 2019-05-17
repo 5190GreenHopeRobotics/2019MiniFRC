@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MiniFRCDriver"
         mc:Ignorable="d"
-        Title="SettingsWindow" Height="450" Width="800" ResizeMode="CanMinimize" Closing="Window_Closing">
-    <Grid Background="#FF383838">
+        Title="SettingsWindow" Height="450" Width="1166" ResizeMode="CanMinimize" Closing="Window_Closing">
+    <Grid Background="#FF383838" Margin="0,0,0,0">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
@@ -19,18 +19,28 @@
                     <Label Content="Settings" Margin="0,-4,19,-4" Foreground="#FFB9B9B9"/>
                 </Border>
                 <TextBox x:Name="settingsBox" HorizontalAlignment="Left" Height="327" Margin="10,35,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="354" Background="#FF646464" BorderBrush="#FF5B5B5B" Foreground="#FFB9B9B9" AcceptsReturn="True"/>
-                <Button x:Name="saveSetButton" Content="Save" HorizontalAlignment="Left" Margin="10,367,0,0" VerticalAlignment="Top" Width="167" Height="20" Background="#FF646464" BorderBrush="#FF5B5B5B" Foreground="#FFB9B9B9" Click="saveSetButton_Click"/>
-                <Button x:Name="loadSsetButton" Content="Load" HorizontalAlignment="Left" VerticalAlignment="Top" Width="167" Margin="197,367,0,0" Foreground="#FFB9B9B9" BorderBrush="#FF5B5B5B" Background="#FF646464" Click="loadSsetButton_Click"/>
+                <Button x:Name="saveSetButton" Content="Save" HorizontalAlignment="Left" Margin="10,367,0,0" VerticalAlignment="Top" Width="172" Height="20" Background="#FF646464" BorderBrush="#FF5B5B5B" Foreground="#FFB9B9B9" Click="saveSetButton_Click"/>
+                <Button x:Name="loadSetButton" Content="Load" HorizontalAlignment="Left" VerticalAlignment="Top" Width="172" Margin="192,367,0,0" Foreground="#FFB9B9B9" BorderBrush="#FF5B5B5B" Background="#FF646464" Click="loadSetButton_Click"/>
             </Grid>
         </Border>
-        <Border BorderBrush="#FF5B5B5B" BorderThickness="1" HorizontalAlignment="Left" Height="399" Margin="406,10,0,0" VerticalAlignment="Top" Width="376">
+        <Border BorderBrush="#FF5B5B5B" BorderThickness="1" HorizontalAlignment="Left" Height="399" Margin="391,10,0,0" VerticalAlignment="Top" Width="376">
             <Grid>
                 <Border BorderBrush="#FF5B5B5B" BorderThickness="1" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="354" Background="#FF646464" Margin="10,10,0,0">
                     <Label Content="Autonomous" Margin="0,-4,19,-4" Foreground="#FFB9B9B9"/>
                 </Border>
                 <TextBox x:Name="autoBox" HorizontalAlignment="Left" Height="327" Margin="10,35,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="354" Background="#FF646464" BorderBrush="#FF5B5B5B" Foreground="#FFB9B9B9" AcceptsReturn="True"/>
-                <Button x:Name="saveAutoButton" Content="Save" HorizontalAlignment="Left" Margin="10,367,0,0" VerticalAlignment="Top" Width="167" Height="20" Background="#FF646464" BorderBrush="#FF5B5B5B" Foreground="#FFB9B9B9" Click="saveAutoButton_Click"/>
-                <Button x:Name="loadAutoButton" Content="Load" HorizontalAlignment="Left" VerticalAlignment="Top" Width="167" Margin="197,367,0,0" Foreground="#FFB9B9B9" BorderBrush="#FF5B5B5B" Background="#FF646464" Click="loadAutoButton_Click"/>
+                <Button x:Name="saveAutoButton" Content="Save" HorizontalAlignment="Left" Margin="10,367,0,0" VerticalAlignment="Top" Width="172" Height="20" Background="#FF646464" BorderBrush="#FF5B5B5B" Foreground="#FFB9B9B9" Click="saveAutoButton_Click"/>
+                <Button x:Name="loadAutoButton" Content="Load" HorizontalAlignment="Left" VerticalAlignment="Top" Width="172" Margin="192,367,0,0" Foreground="#FFB9B9B9" BorderBrush="#FF5B5B5B" Background="#FF646464" Click="loadAutoButton_Click"/>
+            </Grid>
+        </Border>
+        <Border BorderBrush="#FF5B5B5B" BorderThickness="1" Height="399" Margin="772,10,10,0" VerticalAlignment="Top">
+            <Grid>
+                <Border BorderBrush="#FF5B5B5B" BorderThickness="1" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="354" Background="#FF646464" Margin="10,10,0,0">
+                    <Label Content="Off" Margin="0,-4,19,-4" Foreground="#FFB9B9B9"/>
+                </Border>
+                <TextBox x:Name="offBox" HorizontalAlignment="Left" Height="327" Margin="10,35,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="354" Background="#FF646464" BorderBrush="#FF5B5B5B" Foreground="#FFB9B9B9" AcceptsReturn="True"/>
+                <Button x:Name="saveOffButton" Content="Save" HorizontalAlignment="Left" Margin="10,367,0,0" VerticalAlignment="Top" Width="172" Height="20" Background="#FF646464" BorderBrush="#FF5B5B5B" Foreground="#FFB9B9B9" Click="saveOffButton_Click"/>
+                <Button x:Name="loadOffButton" Content="Load" HorizontalAlignment="Left" VerticalAlignment="Top" Width="172" Margin="192,367,0,0" Foreground="#FFB9B9B9" BorderBrush="#FF5B5B5B" Background="#FF646464" Click="loadOffButton_Click"/>
             </Grid>
         </Border>
 

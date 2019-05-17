@@ -54,7 +54,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Autonomous.cs" />
     <Compile Include="ConsoleWindow.xaml.cs">
       <DependentUpon>ConsoleWindow.xaml</DependentUpon>
     </Compile>
@@ -62,7 +61,6 @@
     <Compile Include="SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Teleop.cs" />
     <Page Include="ConsoleWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

@@ -22,6 +22,7 @@ namespace MiniFRCDriver
     {
         public string[] settingLines;
         public string[] autoLines;
+        public string[] offLines;
 
         public SettingsWindow()
         {
@@ -40,7 +41,7 @@ namespace MiniFRCDriver
             autoLines = Regex.Split(autoBox.Text, "\r\n|\r|\n");
         }
 
-        private void loadSsetButton_Click(object sender, RoutedEventArgs e)
+        private void loadSetButton_Click(object sender, RoutedEventArgs e)
         {
             settingsBox.Text = System.IO.File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "settings.txt");
             settingLines = Regex.Split(settingsBox.Text, "\r\n|\r|\n");
@@ -56,6 +57,18 @@ namespace MiniFRCDriver
         {
             this.Visibility = Visibility.Hidden;
             e.Cancel = true;
+        }
+
+        private void saveOffButton_Click(object sender, RoutedEventArgs e)
+        {
+            System.IO.File.WriteAllText(AppDomain.CurrentDomain.BaseDirectory + "off.txt", offBox.Text);
+            offLines = Regex.Split(offBox.Text, "\r\n|\r|\n");
+        }
+
+        private void loadOffButton_Click(object sender, RoutedEventArgs e)
+        {
+            offBox.Text = System.IO.File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "off.txt");
+            offLines = Regex.Split(offBox.Text, "\r\n|\r|\n");
         }
     }
 }

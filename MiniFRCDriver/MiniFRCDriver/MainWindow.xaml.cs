@@ -24,12 +24,9 @@ namespace MiniFRCDriver
     public partial class MainWindow : Window
     {
         public SerialPort serialPort = new SerialPort();
-
+        
         SettingsWindow settings = new SettingsWindow();
         ConsoleWindow console = new ConsoleWindow();
-        InputIdentifier inId = new InputIdentifier();
-        Autonomous Auto = new Autonomous();
-        Teleop teleop = new Teleop();
 
         public Boolean teleopLoop = false;
         public Boolean debugMode = false;
@@ -82,7 +79,7 @@ namespace MiniFRCDriver
 
         //starts auto
         private void autoButton_Click(object sender, RoutedEventArgs e)
-        { var taskAuto = Task.Run( () => { Auto.Start(); }); autoButton.Background = Brushes.Green; }
+        { var taskAuto = Task.Run( () => { autonomous(); }); autoButton.Background = Brushes.Green; }
 
         //code to make consolebox scroll to bottom
         private void consoleBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -110,21 +107,22 @@ namespace MiniFRCDriver
             catch{ errorMsg("Please select a port."); }
         }    
 
-        //stops teleop
+        //stops all
         private void stopButton_Click(object sender, RoutedEventArgs e)
         {   teleopLoop = false;
             serialPort.Close();
             teleopButton.Background = new SolidColorBrush(Color.FromRgb(100, 100, 100));
             autoButton.Background = new SolidColorBrush(Color.FromRgb(100, 100, 100));
+            off();
         }
 
         //Updates the Keys pressed and sends data
         private void mainWindow_KeyDown(object sender, KeyEventArgs e)
-        { teleop.Update(); }
+        { teleop(); }
 
         //Updates the Keys pressed and sends data
         private void mainWindow_KeyUp(object sender, KeyEventArgs e)
-        { teleop.Update(); }
+        { teleop(); }
 
         //Error Message Function
         public void errorMsg(string message)
@@ -137,9 +135,110 @@ namespace MiniFRCDriver
             if (!debugMode) { debugButton.Background = new SolidColorBrush(Color.FromRgb(100, 100, 100)); }
         }
 
-        public void debugConsole(string message)
+        public void autonomous()
         {
+            try
+            {
+                serialPort.Open();
+                if (settings.autoLines != null)
+                {
+                    try
+                    {
+                        foreach (string instruction in settings.autoLines)
+                        {
+                            string[] instParts = Regex.Split(instruction, " ");
+                            string message = "z1 " + instruction;
+                            serialPort.WriteLine(message);
+                            Dispatcher.Invoke(() => { consoleBox.Text = consoleBox.Text + message + "\n"; });
 
+                            Thread.Sleep(Convert.ToInt32(instParts[instParts.Length - 1]) + 2);
+
+                            Dispatcher.Invoke(() => { consoleBox.Text = consoleBox.Text + serialPort.ReadExisting() + "\n"; });
+                        }
+                    }
+                    catch
+                    {
+                        errorMsg("Formatting was incorrect!");
+                        serialPort.Close();
+                    }
+                }
+                else
+                {
+                    errorMsg("Please load auto in the settings menu first.");
+                }
+                serialPort.Close();
+            }
+            catch
+            {
+                errorMsg("Please select a port.");
+                serialPort.Close();
+            }
+        }
+
+        public void teleop()
+        {
+            if (teleopLoop)
+            {
+                if (settings.settingLines != null)
+                {
+                    //try
+                    //{
+                        string message = "z0";
+
+                        foreach (string instruction in settings.settingLines)
+                        {
+                            Key specifiedKey = new Key();
+                            string[] instParts = Regex.Split(instruction, " ");
+                            switch (instParts[0])
+                            {
+                                case "axis":
+                                    string text = "0";
+                                    specifiedKey = InputIdentifier.identifier(instParts[1]);
+                                    Key specifiedKey2 = InputIdentifier.identifier(instParts[2]);
+                                    if (Keyboard.IsKeyDown(specifiedKey) && Keyboard.IsKeyDown(specifiedKey2)) { text = "0"; }
+                                    if (Keyboard.IsKeyDown(specifiedKey) && !Keyboard.IsKeyDown(specifiedKey2)) { text = "1"; }
+                                    if (Keyboard.IsKeyDown(specifiedKey2) && !Keyboard.IsKeyDown(specifiedKey)) { text = "-1"; }
+                                    message = message + " " + text;
+                                    break;
+                                case "button":
+                                    specifiedKey = InputIdentifier.identifier(instParts[1]);
+                                    Console.WriteLine(specifiedKey);
+                                    if (Keyboard.IsKeyDown(specifiedKey))
+                                    { message = message + " 1"; }
+                                    else
+                                    { message = message + " 0"; }
+                                    break;
+                                default:
+                                    errorMsg("Check your formatting!");
+                                    break;
+                            }
+                        }
+                        serialPort.WriteLine(message);
+                        consoleBox.Text = consoleBox.Text + message + "\n";
+                        Console.WriteLine(message);
+                    //}
+                    //catch
+                    //{
+                    //    errorMsg("An error occured! Check your formatting.");
+                    //}
+                }
+            }
+        }
+
+        public void off()
+        {
+            MainWindow main = new MainWindow();
+
+            SerialPort serialPort = main.serialPort;
+            if (settings.offLines != null)
+            {
+                string message = "z0 " + settings.offLines[0];
+                serialPort.WriteLine(message);
+            }
+            else
+            {
+                main.errorMsg("Off was not formatted properly in settings!");
+            }
         }
     }
 }
