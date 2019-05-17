@@ -51,5 +51,11 @@ namespace MiniFRCDriver
             autoBox.Text = System.IO.File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "autonomous.txt");
             autoLines = Regex.Split(autoBox.Text, "\r\n|\r|\n");
         }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            this.Visibility = Visibility.Hidden;
+            e.Cancel = true;
+        }
     }
 }

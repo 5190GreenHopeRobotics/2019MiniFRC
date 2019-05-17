@@ -13,6 +13,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.IO.Ports;
+using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace MiniFRCDriver
 {
@@ -21,7 +23,10 @@ namespace MiniFRCDriver
     /// </summary>
     public partial class MainWindow : Window
     {
-        public string currentPort = "";
+        SerialPort serialPort = new SerialPort();
+
+        SettingsWindow settings = new SettingsWindow();
+        ConsoleWindow console = new ConsoleWindow();
 
         public MainWindow()
         {
@@ -53,7 +58,8 @@ namespace MiniFRCDriver
         {
             if (portList.SelectedItem != null)
             {
-                currentPort = portList.SelectedItem.ToString();
+                serialPort.PortName = portList.SelectedItem.ToString();
+                serialPort.BaudRate = 9600;
                 portNameLabel.Content = portList.SelectedItem.ToString();
             }
             else
@@ -64,14 +70,68 @@ namespace MiniFRCDriver
 
         private void settingsButton_Click(object sender, RoutedEventArgs e)
         {
-            SettingsWindow settings = new SettingsWindow();
-            settings.Show();
+            try
+            {
+                settings.Show();
+            }
+            catch
+            {
+                settings.Visibility = Visibility.Visible;
+            }
         }
 
         private void consoleButton_Click(object sender, RoutedEventArgs e)
         {
             ConsoleWindow console = new ConsoleWindow();
             console.Show();
+        }
+
+        private void autoButton_Click(object sender, RoutedEventArgs e)
+        {
+            serialPort.Open();
+            string[] autoLines = settings.autoLines;
+            if (autoLines != null)
+            {
+                try
+                {
+                    foreach (string instruction in autoLines)
+                    {
+                        string[] instParts = Regex.Split(instruction, " ");
+                        string message = "z2 " + instruction;
+                        serialPort.WriteLine(message);
+                        consoleBox.Text = consoleBox.Text + message + "\n";
+
+                        Thread.Sleep(Convert.ToInt32(instParts[instParts.Length - 1]) + 2);
+
+                        consoleBox.Text = consoleBox.Text + serialPort.ReadExisting() + "\n";
+                    }
+                }
+                catch
+                {
+                    MessageBox.Show("Formatting was incorrect!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Please load auto in the settings menu first.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            serialPort.Close();
+        }
+
+        private void consoleBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (consoleBox.IsVisible)
+            {
+                consoleBox.ScrollToEnd();
+            }
+        }
+
+        private void mainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            settings.settingLines = Regex.Split(System.IO.File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "settings.txt"), "\r\n|\r|\n");
+            consoleBox.Text = consoleBox.Text + "Loaded Settings\n";
+            settings.autoLines = Regex.Split(System.IO.File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "autonomous.txt"), "\r\n|\r|\n");
+            consoleBox.Text = consoleBox.Text + "Loaded Autonomous\n";
         }
     }
 }
