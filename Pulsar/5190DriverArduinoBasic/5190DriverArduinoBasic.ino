@@ -17,7 +17,7 @@ int readMode = 0;
 void setup() {
   velocityClimb = 100;
 
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial.println("Starting...");
 
   bluetooth.begin(9600);
@@ -25,14 +25,14 @@ void setup() {
 }
 
 void loop() {
-  while (Serial.available() > 0) {
-    if ((Serial.read()) == 'z') {
-      readMode = Serial.parseInt();
+  while (bluetooth.available() > 0) {
+    if ((bluetooth.read()) == 'z') {
+      readMode = bluetooth.parseInt();
 
       //parse data in the order of the data in the drive station
-      xAxis = Serial.parseFloat() * -100;
-      yAxis = Serial.parseFloat() * -100;
-      aAxis = Serial.parseFloat() * 100;
+      xAxis = bluetooth.parseFloat() * -100;
+      yAxis = bluetooth.parseFloat() * -100;
+      aAxis = bluetooth.parseFloat() * 100;
       
       switch(readMode){
         case 0: teleop(); break;      // 0 means read it in teleop mode
@@ -49,15 +49,21 @@ void teleop(){
 
 void autonomous(){
   drive(xAxis, yAxis);
-  delay(Serial.parseInt());
-  Serial.write("done");
+  delay(bluetooth.parseInt());
+  bluetooth.write("done");
+}
+
+void emergency(){
+  xAxis = 0;
+  yAxis = 0;
+  aAxis = 0;
 }
 
 void drive(int xAxis, int yAxis) {
-  //  Serial.print("X:");
-  //  Serial.print(xAxis);
-  //  Serial.print(" Y:");
-  //  Serial.println(yAxis);
+  //  bluetooth.print("X:");
+  //  bluetooth.print(xAxis);
+  //  bluetooth.print(" Y:");
+  //  bluetooth.println(yAxis);
   float V = (100 - abs(xAxis)) * (yAxis / 100) + yAxis;
   float W = (100 - abs(yAxis)) * (xAxis / 100) + xAxis;
   velocityL = ((((V - W) / 2) / 100) * 255);
@@ -70,8 +76,8 @@ void drive(int xAxis, int yAxis) {
 }
 
 void aMotor(AF_DCMotor climberMotor, int xAxis) {
-  Serial.print("X:");
-  Serial.println(xAxis);
+  bluetooth.print("X:");
+  bluetooth.println(xAxis);
 
   climberMotor.run((xAxis > 0) ? FORWARD : BACKWARD);
   if (xAxis != 0) {

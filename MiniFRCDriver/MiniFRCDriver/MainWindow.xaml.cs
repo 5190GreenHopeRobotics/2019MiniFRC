@@ -46,7 +46,15 @@ namespace MiniFRCDriver
 
             foreach(string port in ports)
             {
-                portList.Items.Add(port);
+                SerialPort serialTester = new SerialPort();
+                serialTester.PortName = port;
+                serialTester.BaudRate = 9600;
+                try
+                {
+                    serialTester.Open();
+                    serialTester.Close();
+                    portList.Items.Add(port);
+                } catch { }
             }
 
             if (ports.Length == 0)
@@ -62,7 +70,7 @@ namespace MiniFRCDriver
             {
                 try
                 {   serialPort.PortName = portList.SelectedItem.ToString();
-                    serialPort.BaudRate = 115200;
+                    serialPort.BaudRate = 9600;
                     portNameLabel.Content = portList.SelectedItem.ToString();
                 }catch{ errorMsg("You cannot change the port while it is in use."); }
             }
@@ -79,7 +87,11 @@ namespace MiniFRCDriver
 
         //starts auto
         private void autoButton_Click(object sender, RoutedEventArgs e)
-        { var taskAuto = Task.Run( () => { autonomous(); }); autoButton.Background = Brushes.Green; }
+        {
+            Thread th = new Thread(autonomous);
+            th.SetApartmentState(ApartmentState.STA);
+            th.Start();
+            autoButton.Background = Brushes.Green; }
 
         //code to make consolebox scroll to bottom
         private void consoleBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -94,6 +106,8 @@ namespace MiniFRCDriver
                 consoleBox.Text = consoleBox.Text + "Loaded Settings\n";
                 settings.autoLines = Regex.Split(System.IO.File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "autonomous.txt"), "\r\n|\r|\n");
                 consoleBox.Text = consoleBox.Text + "Loaded Autonomous\n";
+                settings.offLines = Regex.Split(System.IO.File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "off.txt"), "r\n|\r|\n");
+                consoleBox.Text = consoleBox.Text + "Loaded Off Settings\n";
             }
             catch
             {
@@ -111,8 +125,6 @@ namespace MiniFRCDriver
         private void stopButton_Click(object sender, RoutedEventArgs e)
         {   teleopLoop = false;
             serialPort.Close();
-            teleopButton.Background = new SolidColorBrush(Color.FromRgb(100, 100, 100));
-            autoButton.Background = new SolidColorBrush(Color.FromRgb(100, 100, 100));
             off();
         }
 
@@ -169,11 +181,13 @@ namespace MiniFRCDriver
                     errorMsg("Please load auto in the settings menu first.");
                 }
                 serialPort.Close();
+                Dispatcher.Invoke(() => { off(); });
             }
             catch
             {
                 errorMsg("Please select a port.");
                 serialPort.Close();
+                Dispatcher.Invoke(() => { off(); });
             }
         }
 
@@ -183,8 +197,8 @@ namespace MiniFRCDriver
             {
                 if (settings.settingLines != null)
                 {
-                    //try
-                    //{
+                    try
+                    {
                         string message = "z0";
 
                         foreach (string instruction in settings.settingLines)
@@ -215,31 +229,42 @@ namespace MiniFRCDriver
                                     break;
                             }
                         }
-                        serialPort.WriteLine(message);
-                        consoleBox.Text = consoleBox.Text + message + "\n";
-                        Console.WriteLine(message);
-                    //}
-                    //catch
-                    //{
-                    //    errorMsg("An error occured! Check your formatting.");
-                    //}
+                        try
+                        {
+                            serialPort.WriteLine(message);
+                            consoleBox.Text = consoleBox.Text + message + "\n";
+                            Console.WriteLine(message);
+                        }
+                        catch
+                        {
+                            errorMsg("Lost Connection!");
+                        }
+                    }
+                    catch
+                    {
+                        errorMsg("An error occured! Check your formatting.");
+                    }
                 }
             }
         }
 
         public void off()
         {
-            MainWindow main = new MainWindow();
+            teleopButton.Background = new SolidColorBrush(Color.FromRgb(100, 100, 100));
+            autoButton.Background = new SolidColorBrush(Color.FromRgb(100, 100, 100));
 
-            SerialPort serialPort = main.serialPort;
             if (settings.offLines != null)
             {
-                string message = "z0 " + settings.offLines[0];
-                serialPort.WriteLine(message);
+                try
+                {
+                    string message = "z0 " + settings.offLines[0];
+                    serialPort.WriteLine(message);
+                }
+                catch { }
             }
             else
             {
-                main.errorMsg("Off was not formatted properly in settings!");
+                errorMsg("Off was not formatted properly in settings!");
             }
         }
     }
