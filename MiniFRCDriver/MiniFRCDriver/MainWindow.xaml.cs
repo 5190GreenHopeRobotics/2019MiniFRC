@@ -29,7 +29,14 @@ namespace MiniFRCDriver
         ConsoleWindow console = new ConsoleWindow();
 
         public Boolean teleopLoop = false;
+        public Boolean autoLoop = false;
         public Boolean debugMode = false;
+        public Boolean connection = false;
+
+        string lastKey;
+
+        public string lastTeleop;
+        public string lastAuto;
 
         public MainWindow()
         {
@@ -88,10 +95,18 @@ namespace MiniFRCDriver
         //starts auto
         private void autoButton_Click(object sender, RoutedEventArgs e)
         {
-            Thread th = new Thread(autonomous);
-            th.SetApartmentState(ApartmentState.STA);
-            th.Start();
-            autoButton.Background = Brushes.Green; }
+            if(connection)
+            {
+                Thread th = new Thread(autonomous);
+                th.SetApartmentState(ApartmentState.STA);
+                th.Start();
+                autoButton.Background = Brushes.Green;
+            }
+            else
+            {
+                errorMsg("Please connect first!");
+            }
+        }
 
         //code to make consolebox scroll to bottom
         private void consoleBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -117,7 +132,17 @@ namespace MiniFRCDriver
 
         //starts teleop
         private void teleopButton_Click(object sender, RoutedEventArgs e)
-        {   try{ teleopLoop = true; serialPort.Open(); teleopButton.Background = Brushes.Green; }
+        {   try
+            {
+                if (connection)
+                {
+                    teleopLoop = true;
+                    teleopButton.Background = Brushes.Green;
+                    Thread th = new Thread(teleopPackets);
+                    th.Start();
+                }
+                else { errorMsg("Please connect first."); }
+            }
             catch{ errorMsg("Please select a port."); }
         }    
 
@@ -130,11 +155,20 @@ namespace MiniFRCDriver
 
         //Updates the Keys pressed and sends data
         private void mainWindow_KeyDown(object sender, KeyEventArgs e)
-        { teleop(); }
+        {
+            if (lastKey != e.Key.ToString())
+            {
+                Parallel.Invoke(() => { teleop(); });
+            }
+            lastKey = e.Key.ToString();
+        }
 
         //Updates the Keys pressed and sends data
         private void mainWindow_KeyUp(object sender, KeyEventArgs e)
-        { teleop(); }
+        {
+            lastKey = "";
+            Parallel.Invoke(() => { teleop(); });
+        }
 
         //Error Message Function
         public void errorMsg(string message)
@@ -151,7 +185,7 @@ namespace MiniFRCDriver
         {
             try
             {
-                serialPort.Open();
+                autoLoop = true;
                 if (settings.autoLines != null)
                 {
                     try
@@ -161,89 +195,158 @@ namespace MiniFRCDriver
                             string[] instParts = Regex.Split(instruction, " ");
                             string message = "z1 " + instruction;
                             serialPort.WriteLine(message);
+                            lastAuto = message;
                             Dispatcher.Invoke(() => { consoleBox.Text = consoleBox.Text + message + "\n"; });
 
-                            Thread.Sleep(Convert.ToInt32(instParts[instParts.Length - 1]) + 2);
+                            Thread.Sleep(Convert.ToInt32(instParts[instParts.Length - 1]) + 10);
 
                             Dispatcher.Invoke(() => { consoleBox.Text = consoleBox.Text + serialPort.ReadExisting() + "\n"; });
 
-                            serialPort.Write("z0 0 0 0");
+                            string reset = "z0";
+                            foreach (string i in settings.offLines)
+                            {
+                                message = message + " " + i;
+                            }
+                            serialPort.Write(message);
                         }
                     }
                     catch
                     {
                         errorMsg("Formatting was incorrect!");
+                        autoLoop = false;
                         serialPort.Close();
+                        Dispatcher.Invoke(() => { off(); });
                     }
                 }
                 else
                 {
                     errorMsg("Please load auto in the settings menu first.");
                 }
-                serialPort.Close();
+                autoLoop = false;
                 Dispatcher.Invoke(() => { off(); });
             }
             catch
             {
                 errorMsg("Please select a port.");
-                serialPort.Close();
+                autoLoop = false;
                 Dispatcher.Invoke(() => { off(); });
             }
         }
 
         public void teleop()
         {
-            if (teleopLoop)
+            if (connection && teleopLoop)
             {
-                if (settings.settingLines != null)
+                if (serialPort.IsOpen)
                 {
-                    try
+                    if (settings.settingLines != null)
                     {
-                        string message = "z0";
-
-                        foreach (string instruction in settings.settingLines)
-                        {
-                            Key specifiedKey = new Key();
-                            string[] instParts = Regex.Split(instruction, " ");
-                            switch (instParts[0])
-                            {
-                                case "axis":
-                                    string text = "0";
-                                    specifiedKey = InputIdentifier.identifier(instParts[1]);
-                                    Key specifiedKey2 = InputIdentifier.identifier(instParts[2]);
-                                    if (Keyboard.IsKeyDown(specifiedKey) && Keyboard.IsKeyDown(specifiedKey2)) { text = "0"; }
-                                    if (Keyboard.IsKeyDown(specifiedKey) && !Keyboard.IsKeyDown(specifiedKey2)) { text = "1"; }
-                                    if (Keyboard.IsKeyDown(specifiedKey2) && !Keyboard.IsKeyDown(specifiedKey)) { text = "-1"; }
-                                    message = message + " " + text;
-                                    break;
-                                case "button":
-                                    specifiedKey = InputIdentifier.identifier(instParts[1]);
-                                    Console.WriteLine(specifiedKey);
-                                    if (Keyboard.IsKeyDown(specifiedKey))
-                                    { message = message + " 1"; }
-                                    else
-                                    { message = message + " 0"; }
-                                    break;
-                                default:
-                                    errorMsg("Check your formatting!");
-                                    break;
-                            }
-                        }
                         try
                         {
-                            serialPort.WriteLine(message);
-                            consoleBox.Text = consoleBox.Text + message + "\n";
-                            Console.WriteLine(message);
+                            string message = "z0";
+
+                            foreach (string instruction in settings.settingLines)
+                            {
+                                Key specifiedKey = new Key();
+                                string[] instParts = Regex.Split(instruction, " ");
+                                switch (instParts[0])
+                                {
+                                    case "axis":
+                                        string text = "0";
+                                        specifiedKey = InputIdentifier.identifier(instParts[1]);
+                                        Key specifiedKey2 = InputIdentifier.identifier(instParts[2]);
+                                        if (Keyboard.IsKeyDown(specifiedKey) && Keyboard.IsKeyDown(specifiedKey2)) { text = "0"; }
+                                        if (Keyboard.IsKeyDown(specifiedKey) && !Keyboard.IsKeyDown(specifiedKey2)) { text = "1"; }
+                                        if (Keyboard.IsKeyDown(specifiedKey2) && !Keyboard.IsKeyDown(specifiedKey)) { text = "-1"; }
+                                        message = message + " " + text;
+                                        break;
+                                    case "button":
+                                        specifiedKey = InputIdentifier.identifier(instParts[1]);
+                                        Console.WriteLine(specifiedKey);
+                                        if (Keyboard.IsKeyDown(specifiedKey))
+                                        { message = message + " 1"; }
+                                        else
+                                        { message = message + " 0"; }
+                                        break;
+                                    default:
+                                        errorMsg("Check your formatting!");
+                                        Dispatcher.Invoke(() => { off(); });
+                                        break;
+                                }
+                            }
+                            try
+                            {
+                                serialPort.WriteLine(message);
+                                consoleBox.Text = consoleBox.Text + message + "\n";
+                                lastTeleop = message;
+                                Console.WriteLine(message);
+                            }
+                            catch
+                            {
+                                errorMsg("Lost Connection!");
+                                Dispatcher.Invoke(() => { off(); });
+                            }
                         }
                         catch
                         {
-                            errorMsg("Lost Connection!");
+                            errorMsg("An error occured! Check your formatting.");
+                            Dispatcher.Invoke(() => { off(); });
                         }
+                    }
+                }
+                else
+                {
+                    errorMsg("Lost Connection!");
+                }
+            }
+            else
+            {
+                errorMsg("Please connect first.");
+            }
+        }
+
+        public void teleopPackets()
+        {
+            while (teleopLoop)
+            {
+                if (serialPort.IsOpen)
+                {
+                    try
+                    {
+                        Console.WriteLine("1teleopLoop");
+                        serialPort.WriteLine(lastTeleop);
+                        Thread.Sleep(20);
+                        Console.WriteLine("2teleoploop");
                     }
                     catch
                     {
-                        errorMsg("An error occured! Check your formatting.");
+                        Console.WriteLine("teleoploopbreak");
+                        Dispatcher.Invoke(() => { teleopLoop = false; });
+                        errorMsg("port was closed!");
+                        Dispatcher.Invoke(() => { off(); });
+                        Console.WriteLine("teleoploopbreak2");
                     }
+                }
+                else
+                {
+                    errorMsg("Lost Connection!");
+                }
+            }
+        }
+        
+        public void autoPackets()
+        {
+            while (autoLoop)
+            {
+                try
+                {
+                    serialPort.WriteLine(lastAuto);
+                    Thread.Sleep(20);
+                }
+                catch
+                {
+                    errorMsg("port was closed!");
+                    off();
                 }
             }
         }
@@ -252,19 +355,34 @@ namespace MiniFRCDriver
         {
             teleopButton.Background = new SolidColorBrush(Color.FromRgb(100, 100, 100));
             autoButton.Background = new SolidColorBrush(Color.FromRgb(100, 100, 100));
+            connection = false;
+            connectButton.Background = new SolidColorBrush(Color.FromRgb(100, 100, 100));
 
-            if (settings.offLines != null)
+            try { serialPort.Close(); } catch { }
+        }
+
+        private void connectButton_Click(object sender, RoutedEventArgs e)
+        {
+            connection = !connection;
+            if (connection = true)
             {
                 try
                 {
-                    string message = "z0 " + settings.offLines[0];
-                    serialPort.WriteLine(message);
+                    serialPort.Open();
+                    connectButton.Background = Brushes.Green;
+                    connectButton.Content = "Connected!";
                 }
-                catch { }
+                catch
+                {
+                    errorMsg("Please choose a port first!");
+                }
             }
             else
             {
-                errorMsg("Off was not formatted properly in settings!");
+                serialPort.Close();
+                off();
+                connectButton.Background = new SolidColorBrush(Color.FromRgb(100, 100, 100));
+                connectButton.Content = "Connect";
             }
         }
     }
