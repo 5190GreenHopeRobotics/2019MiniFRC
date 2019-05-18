@@ -6,8 +6,10 @@ SoftwareSerial bluetooth(A0, A1); //RX,TX
 
 AF_DCMotor mLeft(3);
 AF_DCMotor mRight(4);
+AF_DCMotor mAlt(1);
 
 float xAxis, yAxis;
+float aAxis;
 int velocityL, velocityR, velocityClimb;
 
 int readMode = 0;
@@ -15,7 +17,7 @@ int readMode = 0;
 void setup() {
   velocityClimb = 100;
 
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("Starting...");
 
   bluetooth.begin(9600);
@@ -30,6 +32,7 @@ void loop() {
       //parse data in the order of the data in the drive station
       xAxis = Serial.parseFloat() * -100;
       yAxis = Serial.parseFloat() * -100;
+      aAxis = Serial.parseFloat() * 100;
       
       switch(readMode){
         case 0: teleop(); break;      // 0 means read it in teleop mode
@@ -41,6 +44,7 @@ void loop() {
 
 void teleop(){
   drive(xAxis, yAxis);
+  aMotor(mAlt, aAxis);
 }
 
 void autonomous(){
@@ -65,7 +69,7 @@ void drive(int xAxis, int yAxis) {
   mLeft.setSpeed(abs(velocityL));
 }
 
-void climb(AF_DCMotor climberMotor, int xAxis) {
+void aMotor(AF_DCMotor climberMotor, int xAxis) {
   Serial.print("X:");
   Serial.println(xAxis);
 

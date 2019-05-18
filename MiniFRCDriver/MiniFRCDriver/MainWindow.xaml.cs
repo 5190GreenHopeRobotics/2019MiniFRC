@@ -62,7 +62,7 @@ namespace MiniFRCDriver
             {
                 try
                 {   serialPort.PortName = portList.SelectedItem.ToString();
-                    serialPort.BaudRate = 9600;
+                    serialPort.BaudRate = 115200;
                     portNameLabel.Content = portList.SelectedItem.ToString();
                 }catch{ errorMsg("You cannot change the port while it is in use."); }
             }
@@ -154,6 +154,8 @@ namespace MiniFRCDriver
                             Thread.Sleep(Convert.ToInt32(instParts[instParts.Length - 1]) + 2);
 
                             Dispatcher.Invoke(() => { consoleBox.Text = consoleBox.Text + serialPort.ReadExisting() + "\n"; });
+
+                            serialPort.Write("z0 0 0 0");
                         }
                     }
                     catch
