@@ -39,6 +39,7 @@ float button4 = 0;
 float button5 = 0;
 float button6 = 0;
 float button7 = 0;
+float button8 = 0;
 boolean button5pressed = false;
 boolean button6pressed = false;
 boolean turned = false;
@@ -67,6 +68,7 @@ void loop() {
       button5 = bluetooth.parseFloat();
       button6 = bluetooth.parseFloat();
       button7 = bluetooth.parseFloat();
+      button8 = bluetooth.parseFloat();
 
       if (button5 == 0) {
         //Serial.println("Inside button 5 became 0 ...");
@@ -81,24 +83,24 @@ void loop() {
       // This line tells the drive function what speed and direction to move the motors in
         drive(xAxis, yAxis);
 
-      //rotate servo motor to 180 degrees
-      if (button == 1){
-        servo1.write(180);
-        SimpleSoftwareServo::refresh();
-      } 
 
       //Elevator Motor
       if (button7 == 1) {
-        mElevator.run((FORWARD));     // These comands tell the motors what speed and direction to move at
-        mElevator.setSpeed(200);
-      } else {
+        mElevator.run(FORWARD);     // These comands tell the motors what speed and direction to move at
+        mElevator.setSpeed(100);
+      }
+      if (button8 == 1){
+        mElevator.run(BACKWARD);     // These comands tell the motors what speed and direction to move at
+        mElevator.setSpeed(-100);
+      }
+      if (button7 != 1 && button8 != 1) {
         mElevator.setSpeed(0);
       }
                     
       //little motor
       if (button2 == 1) {
         mSmallMotor1.run((FORWARD));     // These comands tell the motors what speed and direction to move at
-        mSmallMotor1.setSpeed(200);
+        mSmallMotor1.setSpeed(700);
       } else {
         mSmallMotor1.setSpeed(0);
       }
@@ -107,14 +109,19 @@ void loop() {
       if (button3 == 1) {
         drive(-100,0);
         delay(500);
+        //delay(200);
         drive(0,0);
       }
 
+      //rotate servo motor to 180 degrees
+      if (button == 1){
+        servo1.write(120);
+      } 
       //rotate servo motor back to 0 degrees
       if (button4 == 1) {
         servo1.write(0);
-        SimpleSoftwareServo::refresh();
       }
+      SimpleSoftwareServo::refresh();
 
       //better auto (Auto2)
       if ((button5 == 1) && (!button5pressed)) {
@@ -122,19 +129,20 @@ void loop() {
         button5pressed = true;
         // these lines will make it drive forward, turn 90 degrees, go forward, and stop
         drive(-100,0);
-        delay(2000);
+        delay(1000);
         drive(-100,100);
         delay(1000);
         drive(-100,0);
-        delay(2000);
+        delay(1000);
         drive(0,0);
 
         //rotate servo to 180 degrees
-        for (pos = 0; pos <= 180; pos += 10) {
-          servo1.write(pos);
+        servo1.write(120);
+        for(int i = 0; i < 250; i++) {
           SimpleSoftwareServo::refresh();
-          delay(50);
+          delay(1);
         }
+        servo1.write(0);
       }
       
        //Rotate 180 degrees back and forth
@@ -143,13 +151,13 @@ void loop() {
         if (turned == false) {
           //turn right
           drive(-100,100);
-          delay(2000);
+          delay(1000);
           drive(0,0);
           turned = true;
         } else {
           //turn left
           drive(100,-100);
-          delay(2000);
+          delay(1000);
           drive(0,0);
           turned = false;
         }
