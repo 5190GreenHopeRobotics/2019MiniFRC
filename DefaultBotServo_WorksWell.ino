@@ -42,6 +42,7 @@ float button7 = 0;
 float button8 = 0;
 boolean button5pressed = false;
 boolean button6pressed = false;
+boolean button3pressed = false;
 boolean turned = false;
 int pos = 0;
 
@@ -53,7 +54,25 @@ void setup() {
   drive(0,0);
   servo1.attach(9);          //this line tells the robot that your servo is on pin 9. (pin 9 is servo port 1, pin 10 is servo port 2)
   boolean button5pressed = false;
+  
 }
+  
+
+
+// This function handles drive logic and actuation. Don't change this unless you know what you're doing.
+void drive(int xAxis, int yAxis) {
+  
+  float V = (100 - abs(xAxis)) * (yAxis/100) + yAxis;    // This is where the X and Y axis inputs are converted into tank drive logic
+  float W = (100 - abs(yAxis)) * (xAxis/100) + xAxis;
+  velocityL = ((((V-W)/2)/100)*255);
+  velocityR = ((((V+W)/2)/100)*255);
+
+  mRight.run((velocityR >= 0) ? FORWARD : BACKWARD);     // These comands tell the motors what speed and direction to move at
+  mRight.setSpeed(abs(velocityR));
+  mLeft.run((velocityL >= 0) ? FORWARD : BACKWARD);
+  mLeft.setSpeed(abs(velocityL));
+}
+ 
 
 void loop() {
   while(bluetooth.available() > 0){                                   // This line checks for any new data in the buffer from the driverstation
@@ -69,6 +88,7 @@ void loop() {
       button6 = bluetooth.parseFloat();
       button7 = bluetooth.parseFloat();
       button8 = bluetooth.parseFloat();
+      
 
       if (button5 == 0) {
         //Serial.println("Inside button 5 became 0 ...");
@@ -80,8 +100,13 @@ void loop() {
         button6pressed = false;
       }
 
+      if (button3 == 0) {
+        //Serial.println("Inside button 3 became 0 ...");
+        button3pressed = false;
+      }
+
       // This line tells the drive function what speed and direction to move the motors in
-        drive(xAxis, yAxis);
+      drive(xAxis, yAxis);
 
 
       //Elevator Motor
@@ -106,12 +131,12 @@ void loop() {
       }
 
       //go straight auto control (Auto1)
-      if (button3 == 1) {
-        drive(-100,0);
-        delay(500);
+      //if (button3 == 1) {
+        //drive(-100,0);
+        //delay(500);
         //delay(200);
-        drive(0,0);
-      }
+        //drive(0,0);
+      //}
 
       //rotate servo motor to 180 degrees
       if (button == 1){
@@ -123,14 +148,36 @@ void loop() {
       }
       SimpleSoftwareServo::refresh();
 
-      //better auto (Auto2)
+      //1 cargo left auto (Auto2)
       if ((button5 == 1) && (!button5pressed)) {
         Serial.println("Inside button 5 ...");
         button5pressed = true;
         // these lines will make it drive forward, turn 90 degrees, go forward, and stop
         drive(-100,0);
-        delay(1000);
+        delay(1300);
         drive(-100,100);
+        delay(1000);
+        drive(-100,0);
+        delay(1000);
+        drive(0,0);
+
+        //rotate servo to 180 degrees
+        servo1.write(120);
+        for(int i = 0; i < 250; i++) {
+          SimpleSoftwareServo::refresh();
+          delay(1);
+        }
+        servo1.write(0);
+      }
+
+      //1 cargo right auto Auto3 YET TO BE ADDED TO CONFIG FILE
+      if ((button3 == 1) && (!button3pressed)) {
+        Serial.println("Inside button 3 ...");
+        button3pressed = true;
+        // these lines will make it drive forward, turn 90 degrees, go forward, and stop
+        drive(-100,0);
+        delay(1300);
+        drive(100,-100);
         delay(1000);
         drive(-100,0);
         delay(1000);
@@ -150,7 +197,7 @@ void loop() {
         button6pressed = true;
         if (turned == false) {
           //turn right
-          drive(-100,100);
+          drive(-100,100); //not fast enough. only one side is turning FIXXX. What happens if both are negative?
           delay(1000);
           drive(0,0);
           turned = true;
@@ -167,18 +214,3 @@ void loop() {
 }
 
 //drive(-100, 100) for 1000 ms is 90 deg turn, so 2000 ms is 180 deg turn and 500 ms is 45 deg turn
-
-// This function handles drive logic and actuation. Don't change this unless you know what you're doing.
-void drive(int xAxis, int yAxis) {
-  
-  float V = (100 - abs(xAxis)) * (yAxis/100) + yAxis;    // This is where the X and Y axis inputs are converted into tank drive logic
-  float W = (100 - abs(yAxis)) * (xAxis/100) + xAxis;
-  velocityL = ((((V-W)/2)/100)*255);
-  velocityR = ((((V+W)/2)/100)*255);
-
-  mRight.run((velocityR >= 0) ? FORWARD : BACKWARD);     // These comands tell the motors what speed and direction to move at
-  mRight.setSpeed(abs(velocityR));
-  mLeft.run((velocityL >= 0) ? FORWARD : BACKWARD);
-  mLeft.setSpeed(abs(velocityL));
-}
- 
